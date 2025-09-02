@@ -1,89 +1,108 @@
-// app.js
-const WALLET = "0x1985EA6E9c68E1C272d8209f3B478AC2Fdb25c87";
-const KEY = "cqt_rQWhgH6fCgDdryrFqkFvrTP3jJHM";
+// 🔑 Your Covalent API Key
+const COVALENT_API_KEY = "cqt_rQWhgH6fCgDdryrFqkFvrTP3jJHM";
 
-const CHAINS = {
-  "Ethereum": 1,
-  "Base": 8453,
-  "Polygon": 137
+// Known token addresses (Ethereum mainnet)
+const tokenAddresses = {
+  "USDC": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+  "USDT": "0xdAC17F958D2ee523a2206206994597C13D831ec7",
+  "DAI": "0x6B175474E89094C44Da98b954EedeAC495271d0F"
 };
 
-// ----------------- Fetch Assets -----------------
-async function fetchChain(chainName, chainId) {
-  const url = `https://api.covalenthq.com/v1/${chainId}/address/${WALLET}/balances_v2/?key=${KEY}`;
-  const res = await fetch(url);
-  const data = await res.json();
-  return { chainName, items: data.data?.items || [] };
-}
+// Simplified ERC20 ABI
+const erc20Abi = [
+  "function balanceOf(address owner) view returns (uint256)",
+  "function decimals() view returns (uint8)",
+  "function transfer(address to, uint256 amount) returns (bool)"
+];
 
-async function fetchAllChains() {
-  const section = document.getElementById("assets");
-  section.innerHTML = "<p>Loading assets...</p>";
-
-  const results = await Promise.all(
-    Object.entries(CHAINS).map(([n, id]) => fetchChain(n, id))
-  );
-
-  section.innerHTML = "";
-
-  results.forEach(({ chainName, items }) => {
-    const nonZero = items.filter(t => Number(t.balance) > 0);
-    if (nonZero.length) {
-      const heading = document.createElement("h3");
-      heading.textContent = chainName;
-      section.appendChild(heading);
-
-      nonZero.forEach(t => {
-        const bal = Number(t.balance) / (10 ** t.contract_decimals);
-        const div = document.createElement("div");
-        div.textContent = `${t.contract_ticker_symbol}: ${bal.toFixed(4)}`;
-        section.appendChild(div);
-      });
-    }
-  });
-
-  if (section.innerHTML === "") {
-    section.innerHTML = "<p>No assets found across chains.</p>";
-  }
-
-  document.getElementById("wallet-address").textContent = WALLET;
-
-  // Generate QR for receiving
-  document.getElementById("qr").src =
-    `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${WALLET}`;
-}
-
-// ----------------- Send Assets -----------------
-async function sendTransaction() {
+// Start wallet connection + balances
+async function initWallet() {
   if (!window.ethereum) {
-    alert("MetaMask required to send.");
+    alert("Please install MetaMask or another Web3 wallet.");
     return;
   }
 
+  const provider = new ethers.providers.Web3Provider(window.ethereum);
+  await provider.send("eth_requestAccounts", []);
+  const signer = provider.getSigner();
+  const address = await signer.getAddress();
+
+  document.getElementById("wallet-address").innerText = address;
+
+  // Generate QR code
+  QRCode.toCanvas(document.getElementById("qrcode"), address, function (error) {
+    if (error) console.error(error);
+  });
+
+  // Fetch balances
+  fetchBalances(address, provider);
+}
+
+// Fetch ETH + Token balances
+async function fetchBalances(address, provider) {
+  const balancesEl = document.getElementById("balances");
+  balancesEl.innerHTML = "";
+
+  // ETH balance
+  const ethBalance = await provider.getBalance(address);
+  const ethFormatted = ethers.utils.formatEther(ethBalance);
+  const liEth = document.createElement("li");
+  liEth.innerText = `ETH: ${ethFormatted}`;
+  balancesEl.appendChild(liEth);
+
+  // Tokens (USDC, USDT, DAI)
+  for (const [symbol, tokenAddress] of Object.entries(tokenAddresses)) {
+    try {
+      const token = new ethers.Contract(tokenAddress, erc20Abi, provider);
+      const decimals = await token.decimals();
+      const rawBal = await token.balanceOf(address);
+      const formatted = ethers.utils.formatUnits(rawBal, decimals);
+
+      const li = document.createElement("li");
+      li.innerText = `${symbol}: ${formatted}`;
+      balancesEl.appendChild(li);
+    } catch (err) {
+      console.error(`Error fetching ${symbol}:`, err);
+    }
+  }
+}
+
+// Send ETH or Token
+document.getElementById("send-btn").addEventListener("click", async () => {
   try {
     const provider = new ethers.providers.Web3Provider(window.ethereum);
     await provider.send("eth_requestAccounts", []);
     const signer = provider.getSigner();
 
-    const to = document.getElementById("send-to").value;
-    const amount = document.getElementById("send-amount").value;
+    const recipient = document.getElementById("send-to").value.trim();
+    const amount = document.getElementById("send-amount").value.trim();
+    const token = document.getElementById("token-select").value;
 
-    if (!to || !amount) {
-      alert("Enter recipient and amount.");
+    if (!recipient || !amount) {
+      alert("Please enter recipient and amount.");
       return;
     }
 
-    const tx = await signer.sendTransaction({
-      to: to,
-      value: ethers.utils.parseEther(amount)
-    });
+    if (token === "ETH") {
+      const tx = await signer.sendTransaction({
+        to: recipient,
+        value: ethers.utils.parseEther(amount)
+      });
+      alert("ETH Transaction Sent! Hash: " + tx.hash);
+    } else {
+      const tokenAddress = tokenAddresses[token];
+      const erc20 = new ethers.Contract(tokenAddress, erc20Abi, signer);
+      const decimals = await erc20.decimals();
+      const amountInUnits = ethers.utils.parseUnits(amount, decimals);
 
-    alert(`Transaction sent! Hash: ${tx.hash}`);
+      const tx = await erc20.transfer(recipient, amountInUnits);
+      alert(`${token} Transaction Sent! Hash: ` + tx.hash);
+    }
   } catch (err) {
     console.error(err);
-    alert("Transaction failed: " + err.message);
+    alert("Error: " + err.message);
   }
-}
+});
 
-document.addEventListener("DOMContentLoaded", fetchAllChains);
-document.getElementById("send-btn").addEventListener("click", sendTransaction);
+// Run wallet on load
+initWallet();
