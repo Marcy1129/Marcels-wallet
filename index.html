@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no"/>
+  <title>Marcel Lite Wallet</title>
+  <link rel="manifest" href="./manifest.json">
+  <link rel="stylesheet" href="./styles.css">
+  <meta name="theme-color" content="#0ea5e9">
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./service-worker.js');
+      });
+    }
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/ethers@6.13.2/dist/ethers.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+</head>
+<body>
+  <header>
+    <div class="row-center" style="justify-content:space-between;">
+      <div class="row-center">
+        <h1>Marcel Lite Wallet</h1>
+        <span class="chip">PWA</span>
+      </div>
+      <button id="installBtn" class="secondary" style="width:auto;">Add to Home Screen</button>
+    </div>
+    <div class="muted small">Auto-loads assets for 0x1985EA6E9c68E1C272d8209f3B478AC2Fdb25c87</div>
+  </header>
+  <div class="container">
+    <div class="card">
+      <div class="title">Total Portfolio</div>
+      <div id="totalValue" style="font-size:28px;font-weight:800;">$0.00</div>
+      <div class="muted small" id="status">Loading balances…</div>
+    </div>
+    <div class="row">
+      <div class="col">
+        <div class="card">
+          <div class="row-center" style="justify-content:space-between;">
+            <div><div class="title">Base</div><div class="muted small">ETH + tokens</div></div>
+            <span class="badge" id="baseValue">$0.00</span>
+          </div>
+          <div id="baseTokens"></div>
+        </div>
+      </div>
+      <div class="col">
+        <div class="card">
+          <div class="row-center" style="justify-content:space-between;">
+            <div><div class="title">Ethereum</div><div class="muted small">ETH + ERC-20</div></div>
+            <span class="badge" id="ethValue">$0.00</span>
+          </div>
+          <div id="ethTokens"></div>
+        </div>
+      </div>
+      <div class="col">
+        <div class="card">
+          <div class="row-center" style="justify-content:space-between;">
+            <div><div class="title">BSC</div><div class="muted small">BNB + BEP-20</div></div>
+            <span class="badge" id="bscValue">$0.00</span>
+          </div>
+          <div id="bscTokens"></div>
+        </div>
+      </div>
+      <div class="col">
+        <div class="card">
+          <div class="row-center" style="justify-content:space-between;">
+            <div><div class="title">Polygon</div><div class="muted small">MATIC + tokens</div></div>
+            <span class="badge" id="polygonValue">$0.00</span>
+          </div>
+          <div id="polygonTokens"></div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="title">Send</div>
+      <div class="grid">
+        <select id="sendChain">
+          <option value="base">Base</option>
+          <option value="ethereum">Ethereum</option>
+          <option value="bsc">BSC</option>
+          <option value="polygon">Polygon</option>
+        </select>
+        <select id="sendToken"><option value="native">Native</option></select>
+      </div>
+      <div class="grid" style="margin-top:10px;">
+        <input id="recipient" placeholder="Recipient address (0x…)" />
+        <input id="amount" placeholder="Amount" inputmode="decimal" />
+      </div>
+      <div class="grid" style="margin-top:10px;">
+        <input id="privkey" placeholder="Paste private key (optional if unlocked)" />
+        <input id="passcode" placeholder="Passcode (to save/unlock key)" type="password" />
+      </div>
+      <div class="grid" style="margin-top:10px;">
+        <button id="saveKeyBtn" class="secondary">Save Key (AES)</button>
+        <button id="unlockBtn" class="secondary">Unlock Saved Key</button>
+      </div>
+      <div class="grid" style="margin-top:10px;">
+        <button id="sendBtn">Send</button>
+      </div>
+      <div class="muted small" id="sendStatus">Key stays encrypted on-device. Use a strong passcode.</div>
+    </div>
+    <div class="card">
+      <div class="title">Receive</div>
+      <div class="row-center" style="justify-content:space-between;">
+        <div>
+          <div class="muted small">Your address</div>
+          <div style="font-family:monospace;overflow:auto;">0x1985EA6E9c68E1C272d8209f3B478AC2Fdb25c87</div>
+        </div>
+        <button id="copyAddr" class="secondary" style="width:auto;">Copy</button>
+      </div>
+      <div style="margin-top:10px;">
+        <canvas id="qrCanvas" width="240" height="240" style="display:block;margin:auto;border-radius:12px;background:#fff"></canvas>
+      </div>
+      <div class="muted small" id="copyStatus"></div>
+    </div>
+    <footer></footer>
+  </div>
+  <script src="./app.js"></script>
+</body>
+</html>
+      <div class="row-center" style="justify-content:space-between;">
+        <div><div class="muted small">Your address</div><div style="font-family:monospace;overflow:auto;">0x1985EA6E9c68E1C272d8209f3B478AC2Fdb25c87</div></div>
+        <button id="copyAddr" class="secondary" style="width:auto;">Copy</button>
+      </div>
+      <div class="muted small" id="copyStatus"></div>
+    </div>
+    <footer></footer>
+  </div>
+  <script src="./app.js"></script>
+</body>
+</html>
