@@ -8,31 +8,41 @@
 </head>
 <body>
   <div class="app">
-    <h2>OmniWallet — Marcel</h2>
-    <p>Auto-import for <b>0x1985...5c87</b></p>
+    <header>
+      <h1>OmniWallet</h1>
+      <p class="sub">Multi-chain — Marcel</p>
+    </header>
 
     <!-- Connect Wallet -->
-    <button id="connectBtn">🔗 Connect Wallet</button>
-    <p id="connectedWallet"></p>
+    <section class="card">
+      <button id="connectBtn" class="btn-primary">🔗 Connect Wallet</button>
+      <p id="connectedWallet" class="connected"></p>
+    </section>
 
     <!-- Portfolio -->
-    <div id="portfolio"></div>
-    
+    <section id="portfolio" class="card">
+      <p>Loading balances...</p>
+    </section>
+
     <!-- Send Form -->
-    <h3>Send Tokens</h3>
-    <form id="sendForm">
-      <input type="text" id="toAddress" placeholder="Recipient Address" required>
-      <input type="text" id="amount" placeholder="Amount" required>
-      <select id="tokenSelect">
-        <option value="ETH">ETH</option>
-      </select>
-      <button type="submit">Send</button>
-    </form>
+    <section class="card">
+      <h2>Send Tokens</h2>
+      <form id="sendForm" class="form">
+        <input type="text" id="toAddress" placeholder="Recipient Address" required>
+        <input type="text" id="amount" placeholder="Amount" required>
+        <select id="tokenSelect">
+          <option value="ETH">ETH</option>
+        </select>
+        <button type="submit" class="btn-primary">Send</button>
+      </form>
+      <p id="status" class="status"></p>
+    </section>
 
-    <p id="status"></p>
-
-    <button onclick="fetchPortfolio()">🔄 Refresh</button>
-    <button onclick="installPWA()">📲 Add to Home Screen</button>
+    <!-- Actions -->
+    <section class="actions">
+      <button onclick="fetchPortfolio()" class="btn-secondary">🔄 Refresh</button>
+      <button onclick="installPWA()" class="btn-secondary">📲 Add to Home</button>
+    </section>
   </div>
 
   <!-- Ethers -->
