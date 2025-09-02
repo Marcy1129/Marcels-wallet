@@ -1,34 +1,52 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Marcel's Wallet</title>
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
 </head>
 <body>
   <header>
     <h1>Marcel's Wallet</h1>
   </header>
 
-  <main>
-    <section id="wallet">
-      <h2>Your Wallet</h2>
-      <p id="wallet-address">Loading address...</p>
-    </section>
+  <!-- Wallet Address & QR -->
+  <section>
+    <h2>Wallet Address</h2>
+    <p id="wallet-address">Loading...</p>
+    <canvas id="qrcode"></canvas>
+  </section>
 
-    <section id="assets">
-      <h2>Your Assets</h2>
-      <div id="asset-list" class="asset-grid">
-        <p>Loading assets...</p>
-      </div>
-    </section>
-  </main>
+  <!-- Balances -->
+  <section>
+    <h2>Balances</h2>
+    <ul id="balances">
+      <li>Loading balances...</li>
+    </ul>
+  </section>
+
+  <!-- Send -->
+  <section>
+    <h2>Send</h2>
+    <label for="token-select">Choose Asset:</label>
+    <select id="token-select">
+      <option value="ETH">ETH</option>
+      <option value="USDC">USDC</option>
+      <option value="USDT">USDT</option>
+      <option value="DAI">DAI</option>
+    </select>
+    <input type="text" id="send-to" placeholder="Recipient address" />
+    <input type="text" id="send-amount" placeholder="Amount" />
+    <button id="send-btn">Send</button>
+  </section>
 
   <footer>
-    <p>© 2025 Marcel's Wallet</p>
+    <p>Marcel's Web3 Wallet</p>
   </footer>
 
+  <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
   <script src="app.js"></script>
 </body>
 </html>
