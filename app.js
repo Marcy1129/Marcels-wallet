@@ -1,37 +1,19 @@
-async function sendTransaction() {
-  const recipient = document.getElementById("recipient").value.trim();
-  const amount = document.getElementById("amount").value.trim();
-  const statusEl = document.getElementById("status");
-
-  if (!recipient || !amount) {
-    statusEl.innerText = "⚠️ Please enter recipient and amount.";
-    return;
-  }
-
-  try {
-    if (typeof window.ethereum === "undefined") {
-      statusEl.innerText = "⚠️ No wallet provider found (MetaMask / Rainbow).";
-      return;
-    }
-
-    // Request wallet connection
-    await window.ethereum.request({ method: "eth_requestAccounts" });
-
-    // Create provider and signer
-    const provider = new ethers.providers.Web3Provider(window.ethereum);
-    const signer = provider.getSigner();
-
-    // Send transaction
-    const tx = await signer.sendTransaction({
-      to: recipient,
-      value: ethers.utils.parseEther(amount)
-    });
-
-    statusEl.innerText = `✅ Transaction sent!\nHash: ${tx.hash}`;
-    console.log("Transaction:", tx);
-
-  } catch (err) {
-    console.error(err);
-    statusEl.innerText = "❌ Error: " + err.message;
-  }
+// Basic wallet script placeholder
+async function loadWallet() {
+  document.getElementById("balance").innerText = "Balance: Loading...";
+  // Here you would normally fetch wallet data via Web3
+  setTimeout(() => {
+    document.getElementById("balance").innerText = "Balance: 1.234 ETH";
+    document.getElementById("assets").innerText = "Assets: ETH, USDC, DAI";
+  }, 1000);
 }
+
+function sendTransaction() {
+  alert("Send transaction flow...");
+}
+
+function receiveFunds() {
+  alert("Receive funds address flow...");
+}
+
+window.onload = loadWallet;
