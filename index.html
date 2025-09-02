@@ -1,38 +1,61 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Omni Wallet</title>
-  <script src="https://cdn.ethers.io/lib/ethers-5.2.umd.min.js"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>OmniWallet Lite</title>
   <style>
-    body { font-family: Arial, sans-serif; margin: 20px; background: #f9f9f9; }
-    h1, h2, h3 { color: #222; }
-    #assets div { margin: 4px 0; padding: 6px; background: #fff; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-    input, select, button { margin: 6px 0; padding: 8px; width: 100%; max-width: 400px; border: 1px solid #ccc; border-radius: 6px; }
-    button { background: #4caf50; color: white; font-weight: bold; cursor: pointer; }
-    button:hover { background: #45a049; }
-    #qr { margin-top: 10px; }
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 400px;
+      margin: auto;
+      padding: 20px;
+      background: #f4f4f4;
+      color: #333;
+    }
+    h1 {
+      text-align: center;
+    }
+    input, button {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      font-size: 16px;
+    }
+    button {
+      background: #4CAF50;
+      color: white;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    button:hover {
+      background: #45a049;
+    }
+    #status {
+      margin-top: 15px;
+      font-weight: bold;
+      text-align: center;
+    }
   </style>
 </head>
 <body>
-  <h1>Omni Wallet</h1>
-  <p><strong>Wallet:</strong> <span id="wallet-address"></span></p>
-  <img id="qr" alt="QR Code">
+  <h1>OmniWallet Lite</h1>
 
-  <h2>Assets</h2>
-  <div id="assets"></div>
+  <label for="recipient">Recipient Address:</label>
+  <input type="text" id="recipient" placeholder="0x..." />
 
-  <h2>Send</h2>
-  <input id="send-to" placeholder="Recipient address">
-  <input id="send-amount" placeholder="Amount">
-  <select id="send-chain">
-    <option value="ethereum">Ethereum</option>
-    <option value="base">Base</option>
-    <option value="polygon">Polygon</option>
-  </select>
-  <select id="send-token"></select>
-  <button id="send-btn">Send</button>
+  <label for="amount">Amount (ETH):</label>
+  <input type="text" id="amount" placeholder="0.01" />
 
+  <button onclick="sendTransaction()">Send</button>
+
+  <p id="status"></p>
+
+  <!-- Import ethers first -->
+  <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.min.js"></script>
+  <!-- Your wallet logic -->
   <script src="app.js"></script>
 </body>
-</html>
+  </html>
