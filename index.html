@@ -4,34 +4,31 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Marcel's Wallet</title>
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div id="app">
-    <header>
-      <h1>Marcel's Wallet</h1>
-    </header>
+  <header>
+    <h1>Marcel's Wallet</h1>
+  </header>
 
-    <main>
-      <section id="wallet-info">
-        <h2>Your Wallet</h2>
-        <p id="wallet-address">Loading address...</p>
-      </section>
+  <main>
+    <section id="wallet">
+      <h2>Your Wallet</h2>
+      <p id="wallet-address">Loading address...</p>
+    </section>
 
-      <section id="wallet-assets">
-        <h2>Your Assets</h2>
-        <ul id="asset-list">
-          <li>Loading assets...</li>
-        </ul>
-      </section>
-    </main>
+    <section id="assets">
+      <h2>Your Assets</h2>
+      <div id="asset-list" class="asset-grid">
+        <p>Loading assets...</p>
+      </div>
+    </section>
+  </main>
 
-    <footer>
-      <p>© 2025 Marcel's Wallet</p>
-    </footer>
-  </div>
+  <footer>
+    <p>© 2025 Marcel's Wallet</p>
+  </footer>
 
-  <!-- Load wallet logic -->
   <script src="app.js"></script>
 </body>
 </html>
