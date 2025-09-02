@@ -1,56 +1,26 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>OmniWallet — Marcel</title>
-  <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>OmniWallet</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <div class="app">
-    <header>
-      <h1>OmniWallet</h1>
-      <p class="sub">Multi-chain — Marcel</p>
-    </header>
+    <h1>OmniWallet</h1>
+    <div id="wallet-info">
+      <p id="address">Address: Loading...</p>
+      <p id="balance">Balance: Loading...</p>
+      <p id="assets">Assets: Loading...</p>
+    </div>
 
-    <!-- Connect Wallet -->
-    <section class="card">
-      <button id="connectBtn" class="btn-primary">🔗 Connect Wallet</button>
-      <p id="connectedWallet" class="connected"></p>
-    </section>
-
-    <!-- Portfolio -->
-    <section id="portfolio" class="card">
-      <p>Loading balances...</p>
-    </section>
-
-    <!-- Send Form -->
-    <section class="card">
-      <h2>Send Tokens</h2>
-      <form id="sendForm" class="form">
-        <input type="text" id="toAddress" placeholder="Recipient Address" required>
-        <input type="text" id="amount" placeholder="Amount" required>
-        <select id="tokenSelect">
-          <option value="ETH">ETH</option>
-        </select>
-        <button type="submit" class="btn-primary">Send</button>
-      </form>
-      <p id="status" class="status"></p>
-    </section>
-
-    <!-- Actions -->
-    <section class="actions">
-      <button onclick="fetchPortfolio()" class="btn-secondary">🔄 Refresh</button>
-      <button onclick="installPWA()" class="btn-secondary">📲 Add to Home</button>
-    </section>
+    <div class="buttons">
+      <button onclick="sendTransaction()">Send</button>
+      <button onclick="receiveFunds()">Receive</button>
+      <button onclick="refreshAssets()">Refresh</button>
+    </div>
   </div>
-
-  <!-- Ethers -->
-  <script src="https://cdn.jsdelivr.net/npm/ethers@6.7.0/dist/ethers.min.js"></script>
-
-  <!-- WalletConnect -->
-  <script src="https://unpkg.com/@walletconnect/client@2.9.0/dist/index.umd.js"></script>
-  <script src="https://unpkg.com/qrcode-modal@1.0.0/dist/qrcode-modal.min.js"></script>
 
   <script src="app.js"></script>
 </body>
