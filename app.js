@@ -1,118 +1,62 @@
-// Wallet Config
-const API_KEY = "cqt_rQWhgH6fCgDdyrFqkFvrTP3jJHM";
-const WALLET_ADDRESS = "0x1985E6A6E9c68E1C272d82...";
-const CHAINS = [1, 8453, 137, 42161, 56]; 
+const address = "0x1985...c87"; // your wallet address
+const covalentApiKey = "cqt_xxxxx"; // your Covalent API key
+const baseUrl = "https://api.covalenthq.com/v1";
 
-let provider, signer, connectedAddress;
-
-// Portfolio Fetch
-async function fetchPortfolio() {
-  let portfolioDiv = document.getElementById("portfolio");
-  portfolioDiv.innerHTML = "<p>Loading balances...</p>";
+async function fetchAssets() {
+  document.getElementById("address").innerText = `Address: ${address}`;
+  document.getElementById("balance").innerText = "Balance: Loading...";
+  document.getElementById("assets").innerText = "Assets: Loading...";
 
   try {
-    let totalUSD = 0;
-    let html = `<h3>Portfolio</h3>`;
+    const chains = [1, 8453]; // Ethereum + Base (add more chain IDs as needed)
+    let allTokens = [];
 
-    for (const chain of CHAINS) {
-      const url = `https://api.covalenthq.com/v1/${chain}/address/${WALLET_ADDRESS}/balances_v2/?key=${API_KEY}`;
+    for (let chain of chains) {
+      const url = `${baseUrl}/${chain}/address/${address}/balances_v2/?key=${covalentApiKey}`;
       const res = await fetch(url);
       const data = await res.json();
 
       if (data && data.data && data.data.items) {
-        let chainTotal = 0;
-        html += `<div class="chain"><h4>${data.data.chain_name}</h4><ul>`;
-
-        data.data.items.forEach(token => {
-          if (token.quote > 0.01) {
-            chainTotal += token.quote;
-            html += `<li>${token.contract_ticker_symbol}: 
-              ${(token.balance / (10 ** token.contract_decimals)).toFixed(4)} • 
-              US$${token.quote.toFixed(2)}</li>`;
-          }
-        });
-
-        html += `</ul><b>Chain total: US$${chainTotal.toFixed(2)}</b></div>`;
-        totalUSD += chainTotal;
+        allTokens = allTokens.concat(data.data.items);
       }
     }
 
-    html += `<h3>Total (all chains): US$${totalUSD.toLocaleString()}</h3>`;
-    portfolioDiv.innerHTML = html;
+    // Calculate total balance (in USD if available)
+    let balanceText = "Unknown";
+    let assetsText = "";
 
-  } catch (err) {
-    portfolioDiv.innerHTML = `<p style="color:red;">Error fetching balances</p>`;
-    console.error(err);
-  }
-}
+    if (allTokens.length > 0) {
+      let totalUsd = 0;
+      let tokensList = [];
 
-// WalletConnect Integration
-async function connectWallet() {
-  try {
-    const wc = new window.WalletConnect.Client({
-      projectId: "your_project_id_here", // from WalletConnect cloud
-      relayUrl: "wss://relay.walletconnect.com",
-      metadata: {
-        name: "OmniWallet Marcel",
-        description: "Multi-chain wallet",
-        url: "https://yourapp.com",
-        icons: ["https://yourapp.com/icon.png"]
-      }
-    });
-
-    if (!wc.connected) {
-      await wc.createSession();
-      const uri = wc.uri;
-      QRCodeModal.open(uri, () => {
-        console.log("QR Code closed");
+      allTokens.forEach(token => {
+        if (token.quote) totalUsd += token.quote;
+        tokensList.push(`${token.contract_ticker_symbol}: ${token.balance / Math.pow(10, token.contract_decimals)}`);
       });
+
+      balanceText = `$${totalUsd.toFixed(2)} (USD)`;
+      assetsText = tokensList.join(", ");
     }
 
-    wc.on("connect", (error, payload) => {
-      if (error) throw error;
-      const { accounts } = payload.params[0];
-      connectedAddress = accounts[0];
-      document.getElementById("connectedWallet").innerText = "Connected: " + connectedAddress;
-      QRCodeModal.close();
-    });
+    document.getElementById("balance").innerText = `Balance: ${balanceText}`;
+    document.getElementById("assets").innerText = `Assets: ${assetsText}`;
   } catch (err) {
-    console.error("WalletConnect error:", err);
-  }
-}
-
-// Send Transaction
-document.getElementById("sendForm").addEventListener("submit", async (e) => {
-  e.preventDefault();
-  const to = document.getElementById("toAddress").value;
-  const amount = document.getElementById("amount").value;
-  const token = document.getElementById("tokenSelect").value;
-  const status = document.getElementById("status");
-
-  try {
-    if (!connectedAddress) {
-      status.innerText = "Please connect your wallet first.";
-      return;
-    }
-
-    if (token === "ETH") {
-      status.innerText = `Ready to send ${amount} ETH to ${to}. Sign in your wallet app.`;
-      // actual signing handled inside mobile wallet
-    } else {
-      status.innerText = "Token transfers coming soon.";
-    }
-  } catch (err) {
+    document.getElementById("balance").innerText = "Error fetching balance";
+    document.getElementById("assets").innerText = "Error fetching assets";
     console.error(err);
-    status.innerText = "Error sending transaction.";
   }
-});
-
-// PWA Install
-function installPWA() {
-  alert("To install, tap your browser menu > 'Add to Home Screen'.");
 }
 
-// Button events
-document.getElementById("connectBtn").addEventListener("click", connectWallet);
+function sendTransaction() {
+  alert("Send transaction flow... (to be implemented)");
+}
 
-// Auto fetch
-window.onload = fetchPortfolio;
+function receiveFunds() {
+  alert(`Receive funds at address: ${address}`);
+}
+
+function refreshAssets() {
+  fetchAssets();
+}
+
+window.onload = fetchAssets;
