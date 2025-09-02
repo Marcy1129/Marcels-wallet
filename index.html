@@ -1,122 +1,38 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Marcel's Wallet (Direct or MetaMask)</title>
-  <link rel="stylesheet" href="style.css" />
-  <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+  <meta charset="UTF-8">
+  <title>Omni Wallet</title>
+  <script src="https://cdn.ethers.io/lib/ethers-5.2.umd.min.js"></script>
   <style>
-    body { font-family: system-ui, Arial, sans-serif; background:#0b0f14; color:#e7eef7; margin:0; }
-    header { padding:16px 20px; border-bottom:1px solid #16202a; position:sticky; top:0; background:#0b0f14; z-index:10; }
-    h1 { margin:0; font-size:20px; }
-    main { max-width:900px; margin:0 auto; padding:20px; }
-    section { background:#0e141b; border:1px solid #192532; border-radius:14px; padding:16px; margin:16px 0; }
-    .row { display:flex; gap:12px; flex-wrap:wrap; }
-    label { font-size:14px; opacity:.9; }
-    input, select, textarea, button {
-      width:100%; padding:10px 12px; border-radius:10px; border:1px solid #223246; background:#0b1219; color:#e7eef7;
-    }
-    textarea { min-height:78px; }
-    button { background:#3a86ff; border:none; font-weight:600; cursor:pointer; }
-    button.secondary { background:#223246; }
-    button:disabled { opacity:.6; cursor:not-allowed; }
-    .grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
-    @media (max-width:800px) { .grid { grid-template-columns:1fr; } }
-    .muted { color:#9bb0c3; font-size:13px; }
-    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
-    .pill { display:inline-block; padding:4px 8px; border:1px solid #223246; border-radius:999px; font-size:12px; margin-right:6px; }
-    .asset { display:flex; align-items:center; justify-content:space-between; padding:10px 0; border-bottom:1px solid #16202a; }
-    .asset:last-child { border-bottom:none; }
-    h2 { margin:4px 0 12px; font-size:18px; }
-    footer { text-align:center; color:#7f94a8; padding:24px; font-size:13px; }
-    img#qr { display:block; margin:10px auto; background:#fff; padding:6px; border-radius:8px; }
-    .chain-title { margin-top:10px; font-weight:700; }
+    body { font-family: Arial, sans-serif; margin: 20px; background: #f9f9f9; }
+    h1, h2, h3 { color: #222; }
+    #assets div { margin: 4px 0; padding: 6px; background: #fff; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+    input, select, button { margin: 6px 0; padding: 8px; width: 100%; max-width: 400px; border: 1px solid #ccc; border-radius: 6px; }
+    button { background: #4caf50; color: white; font-weight: bold; cursor: pointer; }
+    button:hover { background: #45a049; }
+    #qr { margin-top: 10px; }
   </style>
 </head>
 <body>
-  <header><h1>Marcel’s Wallet</h1></header>
-  <main>
+  <h1>Omni Wallet</h1>
+  <p><strong>Wallet:</strong> <span id="wallet-address"></span></p>
+  <img id="qr" alt="QR Code">
 
-    <!-- Connect Mode -->
-    <section>
-      <h2>Connect</h2>
-      <div class="grid">
-        <div>
-          <label>Mode</label>
-          <select id="mode">
-            <option value="direct">Direct (paste private key)</option>
-            <option value="metamask">MetaMask</option>
-          </select>
-        </div>
-        <div>
-          <label>Chain</label>
-          <select id="chain">
-            <option value="1">Ethereum</option>
-            <option value="8453">Base</option>
-            <option value="137">Polygon</option>
-          </select>
-        </div>
-      </div>
+  <h2>Assets</h2>
+  <div id="assets"></div>
 
-      <div id="direct-box" style="margin-top:12px;">
-        <label>Private key (kept in memory only; NEVER share this)</label>
-        <textarea id="privkey" class="mono" placeholder="0x..."></textarea>
-      </div>
+  <h2>Send</h2>
+  <input id="send-to" placeholder="Recipient address">
+  <input id="send-amount" placeholder="Amount">
+  <select id="send-chain">
+    <option value="ethereum">Ethereum</option>
+    <option value="base">Base</option>
+    <option value="polygon">Polygon</option>
+  </select>
+  <select id="send-token"></select>
+  <button id="send-btn">Send</button>
 
-      <div class="row" style="margin-top:10px;">
-        <button id="connect-btn">Connect</button>
-        <button id="disconnect-btn" class="secondary">Disconnect (clear from memory)</button>
-      </div>
-
-      <p class="muted" style="margin-top:8px;">
-        Connected wallet: <span id="wallet-address" class="mono">—</span>
-      </p>
-      <img id="qr" alt="QR" width="150" height="150" />
-    </section>
-
-    <!-- Balances -->
-    <section>
-      <h2>Balances</h2>
-      <div id="assets"><p class="muted">Not loaded yet.</p></div>
-      <div class="row" style="margin-top:10px;">
-        <button id="refresh-btn" class="secondary">Refresh Balances</button>
-      </div>
-      <p class="muted">Multi-chain: Ethereum, Base, Polygon</p>
-    </section>
-
-    <!-- Send -->
-    <section>
-      <h2>Send</h2>
-      <div class="grid">
-        <div>
-          <label>Asset</label>
-          <select id="token-select">
-            <option value="ETH">ETH / Native</option>
-            <option value="USDC">USDC</option>
-            <option value="USDT">USDT</option>
-            <option value="DAI">DAI</option>
-          </select>
-        </div>
-        <div>
-          <label>Amount</label>
-          <input id="send-amount" placeholder="Amount"/>
-        </div>
-      </div>
-      <div style="margin-top:10px;">
-        <label>Recipient</label>
-        <input id="send-to" placeholder="0x recipient"/>
-      </div>
-      <div class="row" style="margin-top:10px;">
-        <button id="send-btn">Send</button>
-      </div>
-      <p class="muted">ETH/native sends on the currently selected chain. Tokens are on Ethereum mainnet by default below (can extend).</p>
-    </section>
-
-    <footer>Powered by Covalent & Ethers.js — keys never leave your browser.</footer>
-  </main>
-
-  <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
   <script src="app.js"></script>
 </body>
 </html>
