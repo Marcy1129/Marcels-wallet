@@ -2,26 +2,138 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>OmniWallet</title>
-  <link rel="stylesheet" href="style.css" />
+  <title>Omni Wallet – Auto</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <style>
+    :root { --fg:#111; --muted:#666; --card:#fff; --bg:#f6f7f9; --brand:#0b7; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,sans-serif;background:var(--bg);color:var(--fg)}
+    header{padding:20px 16px}
+    .wrap{max-width:980px;margin:0 auto;padding:0 16px 40px}
+    .grid{display:grid;gap:16px}
+    .grid.cols{grid-template-columns:1fr}
+    @media (min-width:860px){.grid.cols{grid-template-columns:1.2fr 1fr}}
+    .card{background:var(--card);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.04);padding:16px}
+    h1{margin:0 0 6px}
+    h2{margin:0 0 10px;font-size:18px}
+    label{font-size:14px;color:var(--muted)}
+    select,input{padding:10px 12px;border:1px solid #ddd;border-radius:10px;font-size:15px}
+    button{padding:10px 14px;border-radius:10px;border:0;background:var(--brand);color:#fff;font-weight:600;cursor:pointer}
+    button.ghost{background:#eee;color:#222}
+    .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+    .mono{font-family:ui-monospace,Menlo,Consolas,monospace}
+    .list{margin:8px 0 0;padding:0;list-style:none}
+    .list li{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px dashed #eee}
+    .pill{padding:4px 8px;border-radius:999px;background:#eef}
+    .muted{color:var(--muted)}
+    .small{font-size:13px}
+    .right{margin-left:auto}
+    .section-title{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+    .hr{height:1px;background:#eee;margin:8px 0 0}
+    a{color:#06f;text-decoration:none}
+    a:hover{text-decoration:underline}
+    #txHistory{max-height:320px;overflow:auto;border:1px solid #eee;border-radius:12px;padding:8px}
+  </style>
+
+  <!-- libs -->
+  <script src="https://cdn.jsdelivr.net/npm/ethers@6.10.0/dist/ethers.min.js"></script>
+  <script src="https://unpkg.com/@solana/web3.js@1.95.2/lib/index.iife.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/qrcodejs/qrcode.min.js"></script>
+
+  <script defer src="app.js"></script>
 </head>
 <body>
-  <div class="app">
-    <h1>OmniWallet</h1>
-    <div id="wallet-info">
-      <p id="address">Address: Loading...</p>
-      <p id="balance">Balance: Loading...</p>
-      <p id="assets">Assets: Loading...</p>
-    </div>
+  <header class="wrap">
+    <h1>🌐 Omni Wallet</h1>
+    <div class="muted small">Keys already built-in. Addresses & assets load automatically.</div>
+  </header>
 
-    <div class="buttons">
-      <button onclick="sendTransaction()">Send</button>
-      <button onclick="receiveFunds()">Receive</button>
-      <button onclick="refreshAssets()">Refresh</button>
-    </div>
-  </div>
+  <main class="wrap grid cols">
+    <!-- Left: Balances & Actions -->
+    <section class="card">
+      <div class="section-title">
+        <h2>Balances & Assets</h2>
+        <span id="networkBadge" class="pill small">…</span>
+        <span id="addrShort" class="pill small mono">…</span>
+      </div>
 
-  <script src="app.js"></script>
+      <div class="row" style="margin-bottom:10px">
+        <div class="row" style="gap:6px">
+          <label for="network">Network</label>
+          <select id="network"></select>
+        </div>
+        <div class="row right" style="gap:6px">
+          <label for="token">Asset</label>
+          <select id="token"></select>
+        </div>
+      </div>
+
+      <div class="card" style="background:#fafafa">
+        <div class="row">
+          <div>
+            <div class="muted small">Address</div>
+            <div id="addrFull" class="mono small">loading…</div>
+          </div>
+          <button id="copyAddr" class="right ghost">Copy</button>
+        </div>
+        <div class="hr"></div>
+        <div class="row" style="margin-top:8px">
+          <div>
+            <div class="muted small">Selected Balance</div>
+            <div id="balance" style="font-size:22px;font-weight:700">…</div>
+          </div>
+          <button id="refresh" class="right ghost">Refresh</button>
+        </div>
+      </div>
+
+      <h2 style="margin-top:16px">My Assets</h2>
+      <ul id="assetList" class="list">
+        <li class="muted small">Scanning tokens…</li>
+      </ul>
+    </section>
+
+    <!-- Right: Send / Receive / History -->
+    <section class="grid">
+      <div class="card">
+        <h2>Send</h2>
+        <div class="row">
+          <label class="small" for="recipient">To</label>
+          <input id="recipient" placeholder="0x... / Solana addr" class="mono" style="flex:1">
+        </div>
+        <div class="row">
+          <label class="small" for="amount">Amount</label>
+          <input id="amount" placeholder="0.0" style="width:180px">
+          <button id="sendBtn">Send</button>
+        </div>
+        <div id="sendNote" class="muted small" style="margin-top:6px">Native & ERC-20 supported. SOL native supported.</div>
+      </div>
+
+      <div class="card">
+        <h2>Receive</h2>
+        <div id="qr" style="width:180px;height:180px"></div>
+        <div class="small mono" id="recvAddrText" style="margin-top:8px">…</div>
+        <div class="row" style="margin-top:8px">
+          <button id="copyRecv" class="ghost">Copy</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="row" style="align-items:center">
+          <h2 style="margin:0">History</h2>
+          <span class="right"></span>
+          <label class="small" for="txFilter">Filter</label>
+          <select id="txFilter">
+            <option value="all">All</option>
+            <option value="sent">Sent</option>
+            <option value="received">Received</option>
+          </select>
+        </div>
+        <div id="txHistory" class="small">Loading…</div>
+        <div class="row" style="margin-top:8px">
+          <button id="moreBtn" class="ghost">View More</button>
+        </div>
+      </div>
+    </section>
+  </main>
 </body>
 </html>
