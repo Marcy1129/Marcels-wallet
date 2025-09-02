@@ -1,20 +1,47 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>OmniWallet Lite</title>
-  <link rel="stylesheet" href="style.css" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OmniWallet — Marcel</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div id="app">
-    <h1>OmniWallet Lite</h1>
-    <p>Your balance and assets will load here.</p>
-    <div id="balance"></div>
-    <div id="assets"></div>
-    <button onclick="sendTransaction()">Send</button>
-    <button onclick="receiveFunds()">Receive</button>
+  <div class="app">
+    <h2>OmniWallet — Marcel</h2>
+    <p>Auto-import for <b>0x1985...5c87</b></p>
+
+    <!-- Connect Wallet -->
+    <button id="connectBtn">🔗 Connect Wallet</button>
+    <p id="connectedWallet"></p>
+
+    <!-- Portfolio -->
+    <div id="portfolio"></div>
+    
+    <!-- Send Form -->
+    <h3>Send Tokens</h3>
+    <form id="sendForm">
+      <input type="text" id="toAddress" placeholder="Recipient Address" required>
+      <input type="text" id="amount" placeholder="Amount" required>
+      <select id="tokenSelect">
+        <option value="ETH">ETH</option>
+      </select>
+      <button type="submit">Send</button>
+    </form>
+
+    <p id="status"></p>
+
+    <button onclick="fetchPortfolio()">🔄 Refresh</button>
+    <button onclick="installPWA()">📲 Add to Home Screen</button>
   </div>
+
+  <!-- Ethers -->
+  <script src="https://cdn.jsdelivr.net/npm/ethers@6.7.0/dist/ethers.min.js"></script>
+
+  <!-- WalletConnect -->
+  <script src="https://unpkg.com/@walletconnect/client@2.9.0/dist/index.umd.js"></script>
+  <script src="https://unpkg.com/qrcode-modal@1.0.0/dist/qrcode-modal.min.js"></script>
+
   <script src="app.js"></script>
 </body>
 </html>
