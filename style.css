@@ -1,29 +1,124 @@
+/* Reset */
+* { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, sans-serif; }
+
 body {
-  font-family: Arial, sans-serif;
-  background: #111;
-  color: #eee;
-  text-align: center;
-  margin: 0;
-  padding: 2rem;
+  background: #f5f7fa;
+  color: #222;
+  display: flex;
+  justify-content: center;
+  padding: 20px;
 }
-#app {
-  background: #222;
-  padding: 2rem;
-  border-radius: 12px;
+
+.app {
+  width: 100%;
   max-width: 500px;
-  margin: auto;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.5);
 }
+
+header {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+h1 {
+  font-size: 2rem;
+  color: #333;
+}
+.sub {
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.card {
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+h2 {
+  margin-bottom: 10px;
+  font-size: 1.2rem;
+  color: #444;
+}
+
+ul {
+  list-style: none;
+  padding: 0;
+}
+ul li {
+  padding: 6px 0;
+  border-bottom: 1px solid #eee;
+  font-size: 0.95rem;
+}
+ul li:last-child {
+  border-bottom: none;
+}
+
+.chain {
+  margin-top: 10px;
+}
+.chain h4 {
+  font-size: 1rem;
+  margin-bottom: 6px;
+  color: #333;
+}
+
+/* Buttons */
 button {
-  margin: 10px;
-  padding: 10px 20px;
-  border: none;
-  border-radius: 8px;
-  background: #4CAF50;
-  color: white;
-  font-size: 16px;
   cursor: pointer;
+  border: none;
+  font-size: 1rem;
+  padding: 10px 16px;
+  border-radius: 12px;
+  transition: 0.2s ease;
 }
-button:hover {
-  background: #45a049;
+
+.btn-primary {
+  background: linear-gradient(135deg, #4f46e5, #3b82f6);
+  color: white;
+  font-weight: 600;
+}
+.btn-primary:hover {
+  background: linear-gradient(135deg, #4338ca, #2563eb);
+}
+
+.btn-secondary {
+  background: #eee;
+  color: #333;
+  margin-right: 8px;
+}
+.btn-secondary:hover {
+  background: #ddd;
+}
+
+/* Forms */
+.form input, .form select {
+  width: 100%;
+  margin-bottom: 10px;
+  padding: 10px;
+  border-radius: 10px;
+  border: 1px solid #ccc;
+}
+.form input:focus, .form select:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 2px rgba(59,130,246,0.3);
+}
+
+.status {
+  margin-top: 10px;
+  font-size: 0.9rem;
+  color: #555;
+}
+
+.connected {
+  font-size: 0.85rem;
+  color: #3b82f6;
+  margin-top: 10px;
+  word-wrap: break-word;
+}
+
+.actions {
+  text-align: center;
 }
