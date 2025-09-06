@@ -2,138 +2,232 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Omni Wallet – Auto</title>
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Marcel Omni Wallet</title>
+  <link rel="manifest" href="manifest.webmanifest" />
+  <meta name="theme-color" content="#0d0d10" />
   <style>
-    :root { --fg:#111; --muted:#666; --card:#fff; --bg:#f6f7f9; --brand:#0b7; }
+    :root{--bg:#0d0d10;--card:#16181d;--border:#2a2f36;--muted:#9aa0a6;--ok:#22c55e;--bad:#ef4444}
     *{box-sizing:border-box}
-    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,sans-serif;background:var(--bg);color:var(--fg)}
-    header{padding:20px 16px}
-    .wrap{max-width:980px;margin:0 auto;padding:0 16px 40px}
-    .grid{display:grid;gap:16px}
-    .grid.cols{grid-template-columns:1fr}
-    @media (min-width:860px){.grid.cols{grid-template-columns:1.2fr 1fr}}
-    .card{background:var(--card);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.04);padding:16px}
-    h1{margin:0 0 6px}
-    h2{margin:0 0 10px;font-size:18px}
-    label{font-size:14px;color:var(--muted)}
-    select,input{padding:10px 12px;border:1px solid #ddd;border-radius:10px;font-size:15px}
-    button{padding:10px 14px;border-radius:10px;border:0;background:var(--brand);color:#fff;font-weight:600;cursor:pointer}
-    button.ghost{background:#eee;color:#222}
-    .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
-    .mono{font-family:ui-monospace,Menlo,Consolas,monospace}
-    .list{margin:8px 0 0;padding:0;list-style:none}
-    .list li{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px dashed #eee}
-    .pill{padding:4px 8px;border-radius:999px;background:#eef}
+    html,body{margin:0;padding:0;background:var(--bg);color:#f6f7fb;font-family:Inter,system-ui,Segoe UI,Roboto,Ubuntu,Arial}
+    header{position:sticky;top:0;background:#0d0d10f2;border-bottom:1px solid var(--border);backdrop-filter:saturate(120%) blur(8px);z-index:10}
+    .wrap{max-width:1080px;margin:0 auto;padding:14px 16px;display:flex;gap:10px;align-items:center}
+    h1{font-size:1.0rem;margin:0}
+    .pill{display:inline-block;border:1px solid var(--border);border-radius:999px;padding:4px 10px;font-size:.85rem}
+    main{max-width:1080px;margin:0 auto;padding:16px}
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:16px;box-shadow:0 12px 28px rgba(0,0,0,.35);margin:16px 0}
+    .row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    input,select,button{width:100%;padding:12px 14px;border-radius:12px;border:1px solid var(--border);background:#101218;color:#fff}
+    button{cursor:pointer;font-weight:700}
+    .mono{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace}
     .muted{color:var(--muted)}
-    .small{font-size:13px}
-    .right{margin-left:auto}
-    .section-title{display:flex;align-items:center;gap:8px;margin-bottom:8px}
-    .hr{height:1px;background:#eee;margin:8px 0 0}
-    a{color:#06f;text-decoration:none}
-    a:hover{text-decoration:underline}
-    #txHistory{max-height:320px;overflow:auto;border:1px solid #eee;border-radius:12px;padding:8px}
+    .list{display:grid;gap:10px}
+    .ok{color:var(--ok)} .bad{color:var(--bad)}
+    .hidden{display:none}
+    dialog{background:#0f1116;border:1px solid var(--border);border-radius:16px;color:#fff;max-width:420px;padding:16px}
   </style>
-
-  <!-- libs -->
-  <script src="https://cdn.jsdelivr.net/npm/ethers@6.10.0/dist/ethers.min.js"></script>
-  <script src="https://unpkg.com/@solana/web3.js@1.95.2/lib/index.iife.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/qrcodejs/qrcode.min.js"></script>
-
-  <script defer src="app.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/ethers@6.13.2/dist/ethers.umd.min.js"></script>
+  <script defer src="assets/env.js"></script>
+  <script defer src="../wallet-functions/wallet-core.js"></script>
+  <script defer src="../api/colvaye.js"></script>
 </head>
 <body>
-  <header class="wrap">
-    <h1>🌐 Omni Wallet</h1>
-    <div class="muted small">Keys already built-in. Addresses & assets load automatically.</div>
+  <header>
+    <div class="wrap">
+      <img src="assets/icon-192.png" alt="icon" width="24" height="24"/>
+      <h1>Marcel Omni Wallet</h1>
+      <span id="netPill" class="pill mono">—</span>
+      <span id="lockPill" class="pill mono">locked</span>
+      <span id="onlinePill" class="pill mono">offline</span>
+      <button id="btnUnlock" style="width:auto" class="pill">Unlock</button>
+    </div>
   </header>
 
-  <main class="wrap grid cols">
-    <!-- Left: Balances & Actions -->
-    <section class="card">
-      <div class="section-title">
-        <h2>Balances & Assets</h2>
-        <span id="networkBadge" class="pill small">…</span>
-        <span id="addrShort" class="pill small mono">…</span>
-      </div>
-
-      <div class="row" style="margin-bottom:10px">
-        <div class="row" style="gap:6px">
-          <label for="network">Network</label>
-          <select id="network"></select>
+  <main>
+    <div class="card">
+      <div class="row">
+        <div>
+          <label>Wallet address</label>
+          <input id="addr" class="mono" placeholder="0x... (auto)" />
+          <div class="muted">Uses <span class="mono">assets/env.js</span> → <span class="mono">DEFAULT_ADDRESS</span> or your saved address.</div>
         </div>
-        <div class="row right" style="gap:6px">
-          <label for="token">Asset</label>
-          <select id="token"></select>
-        </div>
-      </div>
-
-      <div class="card" style="background:#fafafa">
-        <div class="row">
-          <div>
-            <div class="muted small">Address</div>
-            <div id="addrFull" class="mono small">loading…</div>
-          </div>
-          <button id="copyAddr" class="right ghost">Copy</button>
-        </div>
-        <div class="hr"></div>
-        <div class="row" style="margin-top:8px">
-          <div>
-            <div class="muted small">Selected Balance</div>
-            <div id="balance" style="font-size:22px;font-weight:700">…</div>
-          </div>
-          <button id="refresh" class="right ghost">Refresh</button>
-        </div>
-      </div>
-
-      <h2 style="margin-top:16px">My Assets</h2>
-      <ul id="assetList" class="list">
-        <li class="muted small">Scanning tokens…</li>
-      </ul>
-    </section>
-
-    <!-- Right: Send / Receive / History -->
-    <section class="grid">
-      <div class="card">
-        <h2>Send</h2>
-        <div class="row">
-          <label class="small" for="recipient">To</label>
-          <input id="recipient" placeholder="0x... / Solana addr" class="mono" style="flex:1">
-        </div>
-        <div class="row">
-          <label class="small" for="amount">Amount</label>
-          <input id="amount" placeholder="0.0" style="width:180px">
-          <button id="sendBtn">Send</button>
-        </div>
-        <div id="sendNote" class="muted small" style="margin-top:6px">Native & ERC-20 supported. SOL native supported.</div>
-      </div>
-
-      <div class="card">
-        <h2>Receive</h2>
-        <div id="qr" style="width:180px;height:180px"></div>
-        <div class="small mono" id="recvAddrText" style="margin-top:8px">…</div>
-        <div class="row" style="margin-top:8px">
-          <button id="copyRecv" class="ghost">Copy</button>
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="row" style="align-items:center">
-          <h2 style="margin:0">History</h2>
-          <span class="right"></span>
-          <label class="small" for="txFilter">Filter</label>
-          <select id="txFilter">
-            <option value="all">All</option>
-            <option value="sent">Sent</option>
-            <option value="received">Received</option>
+        <div>
+          <label>Network</label>
+          <select id="network">
+            <option value="eth-mainnet">Ethereum</option>
+            <option value="polygon-mainnet">Polygon</option>
+            <option value="bsc-mainnet">BNB Smart Chain</option>
+            <option value="arbitrum-mainnet">Arbitrum One</option>
+            <option value="base-mainnet">Base</option>
           </select>
         </div>
-        <div id="txHistory" class="small">Loading…</div>
-        <div class="row" style="margin-top:8px">
-          <button id="moreBtn" class="ghost">View More</button>
+      </div>
+      <div class="row">
+        <div>
+          <label>Native balance</label>
+          <input id="balance" class="mono" disabled />
+        </div>
+        <div style="display:flex;align-items:end;justify-content:flex-end">
+          <button id="btnRefresh">Refresh</button>
         </div>
       </div>
-    </section>
+      <div class="muted">Tokens via <span class="mono">Colvaye</span> (Covalent). Set API key as secret or in <span class="mono">env.js</span>.</div>
+    </div>
+
+    <div class="card">
+      <h3 style="margin-top:0">All tokens (multi-chain)</h3>
+      <div id="tokens" class="list"></div>
+    </div>
+
+    <div class="card">
+      <h3 style="margin-top:0">Send (Full Control)</h3>
+      <div class="row">
+        <div>
+          <label>To</label>
+          <input id="toAddr" class="mono" placeholder="0x..." disabled />
+        </div>
+        <div>
+          <label>Amount</label>
+          <input id="amount" class="mono" placeholder="0.0" disabled />
+        </div>
+      </div>
+      <div class="row">
+        <div>
+          <label>Private Key (hex, 64 chars) — demo only</label>
+          <input id="privKey" class="mono" placeholder="DO NOT SHARE. Use test wallets only." disabled />
+        </div>
+        <div style="display:flex;align-items:end;justify-content:flex-end">
+          <button id="btnSend" disabled>Send</button>
+        </div>
+      </div>
+      <div id="txStatus" class="muted"></div>
+      <div class="muted" style="margin-top:8px">Security: Full Control is locked by password. Never paste real keys.</div>
+    </div>
+
+    <div id="alerts" class="card"></div>
   </main>
+
+  <dialog id="unlockDlg">
+    <form method="dialog">
+      <h3 style="margin-top:0">Unlock Full Control</h3>
+      <p class="muted">Enter password to enable sending and editing sensitive fields.</p>
+      <input id="unlockPass" type="password" placeholder="Password" />
+      <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px">
+        <button id="dlgCancel" value="cancel">Cancel</button>
+        <button id="dlgOk" value="ok">Unlock</button>
+      </div>
+    </form>
+    <div id="dlgMsg" class="muted" style="margin-top:8px"></div>
+  </dialog>
+
+<script>
+  const qs = (s)=>document.querySelector(s);
+  const addrEl=qs('#addr'), netEl=qs('#network'), balEl=qs('#balance'), tokensEl=qs('#tokens');
+  const statusEl=qs('#txStatus'), netPill=qs('#netPill'), lockPill=qs('#lockPill'), onlinePill=qs('#onlinePill');
+  const unlockBtn=qs('#btnUnlock'), unlockDlg=qs('#unlockDlg'), unlockPass=qs('#unlockPass'), dlgMsg=qs('#dlgMsg');
+  const toEl=qs('#toAddr'), amtEl=qs('#amount'), keyEl=qs('#privKey'), sendBtn=qs('#btnSend');
+
+  function setOnline(){ onlinePill.textContent = navigator.onLine ? 'online' : 'offline'; }
+  window.addEventListener('online', setOnline); window.addEventListener('offline', setOnline); setOnline();
+
+  // ---- Password gate ----
+  // Default password = "marcel123". You can change HASH in env.js or via runtime setter.
+  async function sha256(s){ const b=new TextEncoder().encode(s); const h=await crypto.subtle.digest('SHA-256', b); return [...new Uint8Array(h)].map(x=>x.toString(16).padStart(2,'0')).join(''); }
+  function isUnlocked(){ return localStorage.getItem('MW_UNLOCKED')==='1'; }
+  async function attemptUnlock(pw){
+    const hash = await sha256(pw);
+    const ok = (hash === (window.MARCEL && window.MARCEL.PASSWORD_SHA256));
+    if(ok){ localStorage.setItem('MW_UNLOCKED','1'); applyLockState(); return true; }
+    return false;
+  }
+  function lock(){ localStorage.removeItem('MW_UNLOCKED'); applyLockState(); }
+  function applyLockState(){
+    const unlocked = isUnlocked();
+    lockPill.textContent = unlocked ? 'unlocked' : 'locked';
+    [toEl, amtEl, keyEl, sendBtn].forEach(el=> el.disabled = !unlocked);
+    addrEl.readOnly = !unlocked;
+  }
+  unlockBtn.addEventListener('click', ()=>{
+    if(isUnlocked()){ lock(); return; }
+    dlgMsg.textContent=''; unlockPass.value=''; unlockDlg.showModal();
+  });
+  qs('#dlgOk').addEventListener('click', async (e)=>{
+    e.preventDefault();
+    const ok = await attemptUnlock(unlockPass.value);
+    dlgMsg.textContent = ok ? 'Unlocked' : 'Wrong password';
+    if(ok) unlockDlg.close();
+  });
+  qs('#dlgCancel').addEventListener('click', (e)=>{ e.preventDefault(); unlockDlg.close(); });
+
+  // ---- Address bootstrapping ----
+  function getSavedAddr(){ return localStorage.getItem('MW_ADDRESS') || ''; }
+  function setSavedAddr(v){ localStorage.setItem('MW_ADDRESS', v); }
+  function initAddress(){
+    const preset = window.MARCEL?.DEFAULT_ADDRESS || '';
+    const saved = getSavedAddr();
+    const addr = saved || preset;
+    if(addr) addrEl.value = addr;
+    addrEl.addEventListener('change', ()=> setSavedAddr(addrEl.value.trim()));
+  }
+
+  // ---- UI actions ----
+  async function refresh(){
+    const net = netEl.value; netPill.textContent = net;
+    const addr = (addrEl.value || '').trim();
+    if(!/^0x[a-fA-F0-9]{40}$/.test(addr)){
+      balEl.value='Enter valid 0x address'; tokensEl.innerHTML=''; return;
+    }
+    try{
+      const provider = WalletCore.providerFor(net);
+      const bal = await provider.getBalance(addr);
+      balEl.value = WalletCore.formatEther(bal);
+    }catch(e){
+      balEl.value='RPC error'; console.warn(e);
+    }
+    // Multi-chain token aggregation
+    const chains = ['eth-mainnet','polygon-mainnet','bsc-mainnet','arbitrum-mainnet','base-mainnet'];
+    const lists = await Promise.all(chains.map(c => Colvaye.fetchAssets(c, addr).then(items => items.map(it=>({...it, _chain:c}))).catch(()=>[])));
+    const all = lists.flat();
+    tokensEl.innerHTML = all.length ? all.map(t => `
+      <div class="card">
+        <div style="display:flex;gap:10px;align-items:center">
+          <div style="flex:1">
+            <div class="mono">${t.contract_ticker_symbol || t.symbol || 'TOK'}</div>
+            <div class="muted mono">${t._chain}${t.contract_address ? ' · '+t.contract_address.slice(0,10)+'…' : ''}</div>
+          </div>
+          <div class="mono">${t.balance_display ?? t.balance}</div>
+        </div>
+      </div>`).join('') : '<div class="muted">No tokens found or API key missing.</div>';
+  }
+
+  async function sendTx(){
+    const net = netEl.value;
+    const provider = WalletCore.providerFor(net);
+    const priv = keyEl.value.trim();
+    const to = toEl.value.trim();
+    const amt = amtEl.value.trim();
+    statusEl.textContent='';
+    if(!isUnlocked()){ statusEl.textContent='Locked. Unlock Full Control.'; return; }
+    try{
+      if(!/^0x[a-fA-F0-9]{40}$/.test(to)) throw new Error('Invalid recipient');
+      const signer = new ethers.Wallet(priv, provider);
+      const tx = await signer.sendTransaction({ to, value: ethers.parseEther(amt) });
+      statusEl.innerHTML = `<span class="ok">Broadcasted:</span> <span class="mono">${tx.hash}</span>`;
+      await tx.wait();
+      statusEl.innerHTML = `<span class="ok">Confirmed:</span> <span class="mono">${tx.hash}</span>`;
+      refresh();
+    }catch(e){
+      statusEl.innerHTML = `<span class="bad">${e.message}</span>`;
+    }
+  }
+
+  qs('#btnRefresh').addEventListener('click', refresh);
+  qs('#btnSend').addEventListener('click', sendTx);
+
+  // Boot
+  applyLockState();
+  initAddress();
+  window.addEventListener('load', refresh);
+</script>
 </body>
 </html>
